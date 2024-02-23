@@ -1,0 +1,27 @@
+- name: Clone the repository
+  git:
+    repo: "{{ repository_url }}"
+    dest: "{{ repository_dest }}"
+    clone: yes
+    update: yes
+
+- name: Copy Dockerfile to the project directory
+  copy:
+    src: Dockerfile
+    dest: "{{ repository_dest }}/Dockerfile"
+
+- name: Build the Docker image
+  community.docker.docker_image:
+    build:
+      path: "{{ repository_dest }}"
+    name: "{{ docker_image_name }}"
+    tag: "{{ docker_image_tag }}"
+    source: build
+
+- name: Push Docker image to Docker Hub
+  community.docker.docker_image:
+    name: "{{ docker_image_name }}"
+    tag: "{{ docker_image_tag }}"
+    push: yes
+    repository: "{{ docker_image_name }}"
+    source: local

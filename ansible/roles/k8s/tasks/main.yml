@@ -1,0 +1,17 @@
+- name: Prepare Node
+  import_tasks: prepare_node.yml
+
+- name: Install Container Runtime
+  import_tasks: install_container_runtime.yml
+
+- name: Install Kubernetes packages
+  import_tasks: install_k8s_packages.yml
+
+- name: Create Kubernetes cluster
+  import_tasks: create_k8s_cluster.yml
+
+- name: Install Calico
+  import_tasks: install_calico.yml
+
+- name: Install Helm
+  import_tasks: install_helm.yml

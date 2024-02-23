@@ -1,0 +1,13 @@
+user_name: jialun
+home_path: "{{ lookup('env', 'HOME') }}"
+ssh_key_local: "{{ home_path }}/.ssh/id_rsa"
+ssh_key_public_local: "{{ home_path }}/.ssh/id_rsa.pub"
+
+gcp_project: bosch-150126
+gcp_zone: europe-west1-b
+instance_prefix: node
+instance_count: 1
+instance_type: e2-medium
+instance_disk_size: 30
+instance_image: projects/debian-cloud/global/images/debian-12-bookworm-v20240213
+service_account_file: "{{ home_path }}/secret/bosch-150126-c444fdc7e106.json"

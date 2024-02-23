@@ -1,0 +1,10 @@
+# - name: Build Docker image for APP
+#   import_tasks: build_app.yml
+#   become: false
+#   delegate_to: localhost
+
+- name: Create ingress
+  import_tasks: create_ingress.yml
+
+- name: Create APP
+  import_tasks: create_app.yml

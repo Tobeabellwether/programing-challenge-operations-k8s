@@ -1,0 +1,31 @@
+- name: Disable Swap
+  command: swapoff -a
+
+- name: Enable IP forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    reload: yes
+    sysctl_set: yes
+
+- name: Load br_netfilter module
+  modprobe:
+    name: br_netfilter
+
+- name: Ensure bridged network traffic is passed to iptables
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+    reload: yes
+    sysctl_set: yes
+
+- name: Install required packages
+  apt:
+    name:
+    - python3-kubernetes
+    - git
+    - golang-go
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gpg

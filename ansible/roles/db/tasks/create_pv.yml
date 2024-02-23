@@ -1,0 +1,86 @@
+- name: Clone GCP Compute Persistent Disk CSI Driver repository
+  git:
+    repo: "{{ gce_pd_driver_repo }}"
+    dest: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+    version: 'release-1.12'
+
+- name: Copy GCP service account key to remote
+  copy:
+    src: "{{ service_account_file }}"
+    dest: "/tmp/service-account-key.json"
+    mode: '0400'
+
+- name: Authenticate with GCP using service account key
+  shell: gcloud auth activate-service-account --key-file /tmp/service-account-key.json
+
+- name: Remove service account key from remote
+  file:
+    path: /tmp/service-account-key.json
+    state: absent
+
+- name: Run setup-project.sh script
+  environment:
+    GOPATH: "{{ go_path }}"
+    PROJECT: "{{ gcp_project }}"
+    GCE_PD_SA_NAME: "{{ gce_pd_sa_name }}"
+    GCE_PD_SA_DIR: "{{ gce_pd_sa_dir }}"
+    ENABLE_KMS: "{{ enable_kms }}"
+    ENABLE_KMS_ADMIN: "{{ enable_kms_admin }}"
+    GCE_PD_DRIVER_VERSION: "{{ gce_pd_driver_version }}"
+  shell: ./deploy/setup-project.sh
+  args:
+    chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+
+- name: Deploy the driver on Kubernetes cluster
+  environment:
+    GOPATH: "{{ go_path }}"
+    PROJECT: "{{ gcp_project }}"
+    GCE_PD_SA_NAME: "{{ gce_pd_sa_name }}"
+    GCE_PD_SA_DIR: "{{ gce_pd_sa_dir }}"
+    ENABLE_KMS: "{{ enable_kms }}"
+    ENABLE_KMS_ADMIN: "{{ enable_kms_admin }}"
+    GCE_PD_DRIVER_VERSION: "{{ gce_pd_driver_version }}"
+  shell: ./deploy/kubernetes/deploy-driver.sh
+  args:
+    chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+
+- name: Create StorageClass csi-gce-pd
+  k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ storage_class_name }}"
+      provisioner: pd.csi.storage.gke.io
+      parameters:
+        type: pd-standard
+      volumeBindingMode: WaitForFirstConsumer
+
+- name: Create Persistent Volume
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ persistent_volume_name }}"
+        annotations:
+          pv.kubernetes.io/provisioned-by: pd.csi.storage.gke.io
+      spec:
+        storageClassName: "{{ storage_class_name }}"
+        capacity:
+          storage: "{{ external_disk_size }}"
+        accessModes:
+        - ReadWriteOnce
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.gke.io/zone
+                operator: In
+                values:
+                - "{{ gcp_zone }}"
+        csi:
+          driver: "pd.csi.storage.gke.io"
+          volumeHandle: "projects/{{ gcp_project }}/zones/{{ gcp_zone }}/disks/{{ external_disk_name }}"

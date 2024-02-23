@@ -1,0 +1,5 @@
+# - name: Enable GCP APIs and create instances
+#   import_tasks: create_instances.yml
+
+- name: Configure network for created GCP instances
+  import_tasks: configure_network.yml

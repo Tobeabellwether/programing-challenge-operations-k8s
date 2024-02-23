@@ -1,0 +1,42 @@
+- name: Enable Compute Engine API
+  command: gcloud services enable compute.googleapis.com --project {{ gcp_project }}
+
+- name: Enable Cloud Resource Manager API
+  command: gcloud services enable cloudresourcemanager.googleapis.com --project {{ gcp_project }}
+
+- name: Enable IAM API
+  command: gcloud services enable iam.googleapis.com --project {{ gcp_project }}
+
+- name: Create GCP instances
+  google.cloud.gcp_compute_instance:
+    name: "{{ instance_prefix }}-{{ item }}"
+    project: "{{ gcp_project }}"
+    auth_kind: serviceaccount
+    service_account_file: "{{ service_account_file }}"
+    metadata:
+      ssh-keys: "{{ user_name }}:{{ lookup('file', ssh_key_public_local) }}"
+    zone: "{{ gcp_zone }}"
+    machine_type: "{{ instance_type }}"
+    disks:
+    - auto_delete: true
+      boot: true
+      initialize_params:
+        source_image: "{{ instance_image }}"
+        disk_size_gb: "{{ instance_disk_size }}"
+    network_interfaces:
+    - network:
+        selfLink: "global/networks/default"
+      access_configs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+      tags:
+      - http-server
+      - https-server
+    state: present
+  loop: "{{ range(1, instance_count + 1)|list }}"
+  register: gcp_instances
+
+- name: Generate inventory file
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: "./inventory/hosts.yml"

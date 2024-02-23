@@ -1,0 +1,12 @@
+# - hosts: localhost
+#   gather_facts: yes
+#   become: no
+#   roles:
+#   - vm
+
+- hosts: node-1
+  gather_facts: yes
+  roles:
+  # - k8s
+  # - db
+  - app

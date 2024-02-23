@@ -1,0 +1,14 @@
+- name: Create GCP firewall rule for Kubernetes NodePort access
+  google.cloud.gcp_compute_firewall:
+    name: "k8s-nodeport-access"
+    project: "{{ gcp_project }}"
+    auth_kind: "serviceaccount"
+    service_account_file: "{{ service_account_file }}"
+    state: "present"
+    allowed:
+    - ip_protocol: "tcp"
+      ports:
+      - "30000-32767"
+    source_ranges: "0.0.0.0/0"
+    direction: "INGRESS"
+    priority: 1000

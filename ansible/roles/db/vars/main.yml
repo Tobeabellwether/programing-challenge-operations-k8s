@@ -1,0 +1,18 @@
+gcp_project: bosch-150126
+gcp_zone: europe-west1-b
+home_path: "{{ lookup('env', 'HOME') }}"
+service_account_file: "{{ home_path }}/secret/bosch-150126-c444fdc7e106.json"
+go_path: "{{ ansible_env.HOME }}/go"
+gce_pd_driver_repo: https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver
+gce_pd_driver_version: stable-master
+external_disk_name: persistent-volume
+external_disk_size: 100
+persistent_volume_name: app-pv
+storage_class_name: csi-gce-pd
+gce_pd_sa_name: my-gce-pd-csi-sa
+gce_pd_sa_dir: /my/safe/credentials/directory
+enable_kms: false
+enable_kms_admin: false
+
+mysql_namespace: default
+mysql_host: 10.96.8.8
