@@ -45,7 +45,7 @@
     chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
 
 - name: Create StorageClass csi-gce-pd
-  k8s:
+  kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: storage.k8s.io/v1
@@ -58,7 +58,7 @@
       volumeBindingMode: WaitForFirstConsumer
 
 - name: Create Persistent Volume
-  k8s:
+  kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1

@@ -37,6 +37,6 @@
   register: gcp_instances
 
 - name: Generate inventory file
-  ansible.builtin.template:
+  template:
     src: hosts.j2
     dest: "./inventory/hosts.yml"
