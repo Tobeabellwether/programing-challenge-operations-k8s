@@ -10,4 +10,4 @@ instance_count: 1
 instance_type: e2-medium
 instance_disk_size: 30
 instance_image: projects/debian-cloud/global/images/debian-12-bookworm-v20240213
-service_account_file: "{{ home_path }}/secret/bosch-150126-c444fdc7e106.json"
+service_account_file: "{{ home_path }}/secret/bosch-150126-1836c1259684.json"

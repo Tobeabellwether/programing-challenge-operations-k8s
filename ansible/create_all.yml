@@ -7,6 +7,6 @@
 - hosts: node-1
   gather_facts: yes
   roles:
-  # - k8s
-  # - db
+  - k8s
+  - db
   - app
