@@ -28,7 +28,7 @@
     state: directory
 
 - name: Generate default containerd configuration
-  shell: containerd config default
+  command: containerd config default
   register: containerd_config
 
 - name: Write the containerd config to file

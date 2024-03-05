@@ -5,6 +5,4 @@
     mode: '700'
 
 - name: Execute Helm install script
-  shell:
-    cmd: /tmp/get_helm.sh
-    creates: /usr/local/bin/helm
+  command: /tmp/get_helm.sh

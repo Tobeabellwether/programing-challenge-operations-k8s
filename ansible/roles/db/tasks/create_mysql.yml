@@ -4,8 +4,7 @@
     repo_url: https://charts.bitnami.com/bitnami
 
 - name: Update Helm repositories
-  command:
-    cmd: helm repo update
+  command: helm repo update
 
 - name: Deploy MySQL using Helm
   kubernetes.core.helm:

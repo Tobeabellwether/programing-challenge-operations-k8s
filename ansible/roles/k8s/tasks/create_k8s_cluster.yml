@@ -1,5 +1,5 @@
 - name: Initialize the Kubernetes cluster
-  shell: kubeadm init --pod-network-cidr={{ pod_network_cidr }}
+  command: kubeadm init --pod-network-cidr={{ pod_network_cidr }}
 
 - name: Create .kube directory
   file:

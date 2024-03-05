@@ -8,10 +8,10 @@
   copy:
     src: "{{ service_account_file }}"
     dest: "/tmp/service-account-key.json"
-    mode: '0400'
+    mode: '400'
 
 - name: Authenticate with GCP using service account key
-  shell: gcloud auth activate-service-account --key-file /tmp/service-account-key.json
+  command: gcloud auth activate-service-account --key-file /tmp/service-account-key.json
 
 - name: Remove service account key from remote
   file:
@@ -27,7 +27,7 @@
     ENABLE_KMS: "{{ enable_kms }}"
     ENABLE_KMS_ADMIN: "{{ enable_kms_admin }}"
     GCE_PD_DRIVER_VERSION: "{{ gce_pd_driver_version }}"
-  shell: ./deploy/setup-project.sh
+  command: ./deploy/setup-project.sh
   args:
     chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
 
@@ -40,7 +40,7 @@
     ENABLE_KMS: "{{ enable_kms }}"
     ENABLE_KMS_ADMIN: "{{ enable_kms_admin }}"
     GCE_PD_DRIVER_VERSION: "{{ gce_pd_driver_version }}"
-  shell: ./deploy/kubernetes/deploy-driver.sh
+  command: ./deploy/kubernetes/deploy-driver.sh
   args:
     chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
 
