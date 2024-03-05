@@ -7,5 +7,4 @@
     src: "https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/custom-resources.yaml"
 
 - name: Remove control-plane taint from all nodes
-  command:
-    cmd: "kubectl taint nodes --all node-role.kubernetes.io/control-plane-"
+  command: "kubectl taint nodes --all node-role.kubernetes.io/control-plane-"
