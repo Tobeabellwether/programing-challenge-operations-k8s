@@ -5,20 +5,26 @@
 
 ## Project Structure
 ```
-programming-challenge-operations-k8s/ansible/
+programming-challenge-operations-k8s/
+├── ansible/
+│   ├── inventory/            # Directory containing Ansible inventory files
+│   │   └── hosts.ini         # INI file defining hosts and groups for Ansible to target
+│   │
+│   ├── roles/                # Directory for Ansible roles, modularizing tasks
+│   │   ├── vm/               # Role for managing VM provisioning (GCE) and VPC firewall configuration
+│   │   ├── k8s/              # Role for setting up and configuring the Kubernetes cluster with add-ons like Calico, Helm
+│   │   ├── db/               # Role for deploying and managing the PV driver, PV, and database
+│   │   └── app/              # Role for deploying the application, interacting with MySQL, exposing services through Ingress
+│   │
+│   ├── requirements.txt      # Python requirements file for Ansible modules, GCP SDK, and Kubernetes operations
+│   ├── create_vm.yml         # Ansible playbook for orchestrating VM provisioning and VPC configuration
+│   └── create_app.yml        # Ansible playbook for APP deployment with K8s Cluster and DB it depends on
 │
-├── inventory/        # Directory containing Ansible inventory files
-│   └── hosts.ini     # INI file defining hosts and groups for Ansible to target
-│
-├── roles/            # Directory for Ansible roles, modularizing tasks
-│   ├── vm/           # Role for managing VM provisioning (GCE) and VPC firewall configuration
-│   ├── k8s/          # Role for setting up and configuring the Kubernetes cluster with add-ons like Calico, Helm
-│   ├── db/           # Role for deploying and managing the PV driver, PV, and database
-│   └── app/          # Role for deploying the application, interacting with MySQL, exposing services through Ingress
-│
-├── requirements.txt  # Python requirements file for Ansible modules, GCP SDK, and Kubernetes operations
-├── create_vm.yml     # Ansible playbook for orchestrating VM provisioning and VPC confiuration
-└── create_app.yml    # Ansible playbook for K8s setup, DB and APP deployment
+└── helm-chart/               # Directory for Helm chart resources
+    ├── Chart.yaml            # Helm chart metadata file
+    ├── templates/            # Templates for Kubernetes resources
+    ├── charts/               # Optional: charts that this chart depends on
+    └── values.yaml           # Default configuration values for the chart
 ```
 
 ## Create Ansible Env
