@@ -1,8 +1,33 @@
-- name: Download Helm install script
-  get_url:
-    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-    dest: /tmp/get_helm.sh
-    mode: '700'
+- name: Add Helm GPG key
+  ansible.builtin.get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /etc/apt/keyrings/helm.asc
+    mode: "644"
 
-- name: Execute Helm install script
-  command: /tmp/get_helm.sh
+- name: Get system architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Add Helm repository
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [arch={{ system_arch.stdout }} signed-by=/etc/apt/keyrings/helm.asc]
+      https://baltocdn.com/helm/stable/debian all main
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+
+- name: Add the Bitnami Helm repository
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: https://charts.bitnami.com/bitnami
+
+- name: Update Helm repositories
+  ansible.builtin.command: helm repo update
+  changed_when: false

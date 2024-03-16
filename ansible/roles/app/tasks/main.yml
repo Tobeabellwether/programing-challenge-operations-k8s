@@ -4,7 +4,11 @@
 #   delegate_to: localhost
 
 - name: Create ingress
-  import_tasks: create_ingress.yml
+  ansible.builtin.import_tasks: create_ingress.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true
 
 - name: Create APP
-  import_tasks: create_app.yml
+  ansible.builtin.import_tasks: create_app.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true

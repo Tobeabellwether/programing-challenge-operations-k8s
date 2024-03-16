@@ -1,0 +1,6 @@
+- name: Create VM
+  hosts: localhost
+  gather_facts: true
+  become: false
+  roles:
+    - vm

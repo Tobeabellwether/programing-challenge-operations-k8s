@@ -1,27 +1,27 @@
 - name: Clone the repository
-  git:
-    repo: "{{ repository_url }}"
-    dest: "{{ repository_dest }}"
-    clone: yes
-    update: yes
+  ansible.builtin.git:
+    repo: "{{ app_repository_url }}"
+    dest: "{{ app_repository_dest }}"
+    version: "master"
 
 - name: Copy Dockerfile to the project directory
-  copy:
+  ansible.builtin.copy:
     src: Dockerfile
-    dest: "{{ repository_dest }}/Dockerfile"
+    dest: "{{ app_repository_dest }}/Dockerfile"
+    mode: "644"
 
 - name: Build the Docker image
   community.docker.docker_image:
     build:
-      path: "{{ repository_dest }}"
-    name: "{{ docker_image_name }}"
-    tag: "{{ docker_image_tag }}"
+      path: "{{ app_repository_dest }}"
+    name: "{{ app_docker_image_name }}"
+    tag: "{{ app_docker_image_tag }}"
     source: build
 
 - name: Push Docker image to Docker Hub
   community.docker.docker_image:
-    name: "{{ docker_image_name }}"
-    tag: "{{ docker_image_tag }}"
-    push: yes
-    repository: "{{ docker_image_name }}"
+    name: "{{ app_docker_image_name }}"
+    tag: "{{ app_docker_image_tag }}"
+    push: true
+    repository: "{{ app_docker_image_name }}"
     source: local

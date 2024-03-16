@@ -1,15 +1,28 @@
+- name: Check if Kubernetes is already initialized
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: k8s_initialized
+  changed_when: false
+
 - name: Initialize the Kubernetes cluster
-  command: kubeadm init --pod-network-cidr={{ pod_network_cidr }}
+  ansible.builtin.command: kubeadm init --pod-network-cidr={{ k8s_pod_network_cidr }}
+  changed_when: false
+  when: not k8s_initialized.stat.exists
 
 - name: Create .kube directory
-  file:
+  ansible.builtin.file:
     path: "~/.kube"
     state: directory
-    mode: '600'
+    mode: "700"
 
 - name: Copy admin.conf to user's kube config
-  copy:
+  ansible.builtin.copy:
     src: "/etc/kubernetes/admin.conf"
     dest: "~/.kube/config"
-    remote_src: yes
-    mode: '600'
+    remote_src: true
+    mode: "600"
+
+- name: Get join command
+  ansible.builtin.command: kubeadm token create --print-join-command
+  register: join_command
+  changed_when: false

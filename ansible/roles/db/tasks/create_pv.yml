@@ -1,48 +1,60 @@
+- name: Install Go
+  ansible.builtin.apt:
+    name:
+      - golang-go
+      - python3-pexpect
+
 - name: Clone GCP Compute Persistent Disk CSI Driver repository
-  git:
-    repo: "{{ gce_pd_driver_repo }}"
-    dest: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
-    version: 'release-1.12'
+  ansible.builtin.git:
+    repo: "{{ db_gce_pd_driver_repo }}"
+    dest: "{{ db_go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+    version: "release-1.12"
 
 - name: Copy GCP service account key to remote
-  copy:
+  ansible.builtin.copy:
     src: "{{ service_account_file }}"
     dest: "/tmp/service-account-key.json"
-    mode: '400'
+    mode: "400"
 
 - name: Authenticate with GCP using service account key
-  command: gcloud auth activate-service-account --key-file /tmp/service-account-key.json
+  ansible.builtin.command: gcloud auth activate-service-account --key-file /tmp/service-account-key.json
+  changed_when: false
 
 - name: Remove service account key from remote
-  file:
+  ansible.builtin.file:
     path: /tmp/service-account-key.json
     state: absent
 
 - name: Run setup-project.sh script
-  environment:
-    GOPATH: "{{ go_path }}"
-    PROJECT: "{{ gcp_project }}"
-    GCE_PD_SA_NAME: "{{ gce_pd_sa_name }}"
-    GCE_PD_SA_DIR: "{{ gce_pd_sa_dir }}"
-    ENABLE_KMS: "{{ enable_kms }}"
-    ENABLE_KMS_ADMIN: "{{ enable_kms_admin }}"
-    GCE_PD_DRIVER_VERSION: "{{ gce_pd_driver_version }}"
-  command: ./deploy/setup-project.sh
+  ansible.builtin.expect:
+    command: ./deploy/setup-project.sh
+    responses:
+      "(y/n)": "y"
   args:
-    chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+    chdir: "{{ db_go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+  environment:
+    GOPATH: "{{ db_go_path }}"
+    PROJECT: "{{ gcp_project }}"
+    GCE_PD_SA_NAME: "{{ db_gce_pd_sa_name }}"
+    GCE_PD_SA_DIR: "{{ db_gce_pd_sa_dir }}"
+    ENABLE_KMS: "{{ db_enable_kms }}"
+    ENABLE_KMS_ADMIN: "{{ db_enable_kms_admin }}"
+    GCE_PD_DRIVER_VERSION: "{{ db_gce_pd_driver_version }}"
+  timeout: 60
 
 - name: Deploy the driver on Kubernetes cluster
-  environment:
-    GOPATH: "{{ go_path }}"
-    PROJECT: "{{ gcp_project }}"
-    GCE_PD_SA_NAME: "{{ gce_pd_sa_name }}"
-    GCE_PD_SA_DIR: "{{ gce_pd_sa_dir }}"
-    ENABLE_KMS: "{{ enable_kms }}"
-    ENABLE_KMS_ADMIN: "{{ enable_kms_admin }}"
-    GCE_PD_DRIVER_VERSION: "{{ gce_pd_driver_version }}"
-  command: ./deploy/kubernetes/deploy-driver.sh
+  ansible.builtin.command: ./deploy/kubernetes/deploy-driver.sh
   args:
-    chdir: "{{ go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+    chdir: "{{ db_go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
+  environment:
+    GOPATH: "{{ db_go_path }}"
+    PROJECT: "{{ gcp_project }}"
+    GCE_PD_SA_NAME: "{{ db_gce_pd_sa_name }}"
+    GCE_PD_SA_DIR: "{{ db_gce_pd_sa_dir }}"
+    ENABLE_KMS: "{{ db_enable_kms }}"
+    ENABLE_KMS_ADMIN: "{{ db_enable_kms_admin }}"
+    GCE_PD_DRIVER_VERSION: "{{ db_gce_pd_driver_version }}"
+  changed_when: false
 
 - name: Create StorageClass csi-gce-pd
   kubernetes.core.k8s:
@@ -51,7 +63,7 @@
       apiVersion: storage.k8s.io/v1
       kind: StorageClass
       metadata:
-        name: "{{ storage_class_name }}"
+        name: "{{ db_storage_class_name }}"
       provisioner: pd.csi.storage.gke.io
       parameters:
         type: pd-standard
@@ -64,23 +76,23 @@
       apiVersion: v1
       kind: PersistentVolume
       metadata:
-        name: "{{ persistent_volume_name }}"
+        name: "{{ db_persistent_volume_name }}"
         annotations:
           pv.kubernetes.io/provisioned-by: pd.csi.storage.gke.io
       spec:
-        storageClassName: "{{ storage_class_name }}"
+        storageClassName: "{{ db_storage_class_name }}"
         capacity:
-          storage: "{{ external_disk_size }}"
+          storage: "{{ db_external_disk_size }}"
         accessModes:
-        - ReadWriteOnce
+          - ReadWriteOnce
         nodeAffinity:
           required:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: topology.gke.io/zone
-                operator: In
-                values:
-                - "{{ gcp_zone }}"
+              - matchExpressions:
+                  - key: topology.gke.io/zone
+                    operator: In
+                    values:
+                      - "{{ gcp_zone }}"
         csi:
           driver: "pd.csi.storage.gke.io"
-          volumeHandle: "projects/{{ gcp_project }}/zones/{{ gcp_zone }}/disks/{{ external_disk_name }}"
+          volumeHandle: "projects/{{ gcp_project }}/zones/{{ gcp_zone }}/disks/{{ db_external_disk_name }}"

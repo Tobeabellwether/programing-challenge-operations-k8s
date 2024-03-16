@@ -1,5 +1,9 @@
 - name: Install GCE PV driver and create PV
-  import_tasks: create_pv.yml
+  ansible.builtin.import_tasks: create_pv.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true
 
 - name: Create MySQL using Helm
-  import_tasks: create_mysql.yml
+  ansible.builtin.import_tasks: create_mysql.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true

@@ -1,0 +1,7 @@
+- name: Create app
+  hosts: all
+  gather_facts: true
+  roles:
+    - k8s
+    - db
+    - app

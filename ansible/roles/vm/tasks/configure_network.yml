@@ -6,9 +6,9 @@
     service_account_file: "{{ service_account_file }}"
     state: "present"
     allowed:
-    - ip_protocol: "tcp"
-      ports:
-      - "30000-32767"
+      - ip_protocol: "tcp"
+        ports:
+          - "30000-32767"
     source_ranges: "0.0.0.0/0"
     direction: "INGRESS"
     priority: 1000

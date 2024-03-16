@@ -1,5 +1,5 @@
-# - name: Enable GCP APIs and create instances
-#   import_tasks: create_instances.yml
+- name: Enable GCP APIs and create instances
+  ansible.builtin.import_tasks: create_instances.yml
 
 - name: Configure network for created GCP instances
-  import_tasks: configure_network.yml
+  ansible.builtin.import_tasks: configure_network.yml

@@ -1,13 +1,4 @@
-repository_url: https://github.com/docker/getting-started-app.git
-repository_dest: ./getting-started-app
-docker_image_name: tobeabellwether/getting-started
-docker_image_tag: latest
-
-app_namespace: default
-app_labels: {app: getting-started}
-replica_count: 1
-app_name: getting-started
-
-mysql_host: 10.96.8.8
-mysql_user: root
-mysql_db: my_database
+app_repository_url: https://github.com/docker/getting-started-app.git
+app_repository_dest: ./getting-started-app
+app_docker_image_name: tobeabellwether/getting-started
+app_docker_image_tag: latest

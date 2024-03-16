@@ -1,17 +1,28 @@
 - name: Prepare Node
-  import_tasks: prepare_node.yml
+  ansible.builtin.import_tasks: prepare_node.yml
 
 - name: Install Container Runtime
-  import_tasks: install_container_runtime.yml
+  ansible.builtin.import_tasks: install_container_runtime.yml
 
 - name: Install Kubernetes packages
-  import_tasks: install_k8s_packages.yml
+  ansible.builtin.import_tasks: install_k8s_packages.yml
 
 - name: Create Kubernetes cluster
-  import_tasks: create_k8s_cluster.yml
+  ansible.builtin.import_tasks: create_k8s_cluster.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true
 
-- name: Install Calico
-  import_tasks: install_calico.yml
+- name: Join node to cluster
+  ansible.builtin.command: "{{ hostvars[groups['kube-master'][0]].join_command.stdout }}"
+  changed_when: false
+  when: inventory_hostname in groups['kube-node']
 
 - name: Install Helm
-  import_tasks: install_helm.yml
+  ansible.builtin.import_tasks: install_helm.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true
+
+- name: Install Calico
+  ansible.builtin.import_tasks: install_calico.yml
+  when: inventory_hostname in groups['kube-master']
+  run_once: true
