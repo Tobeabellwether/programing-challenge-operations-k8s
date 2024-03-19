@@ -15,16 +15,13 @@
       deb [arch={{ system_arch.stdout }} signed-by=/etc/apt/keyrings/docker.asc]
       https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
 
-- name: Update apt cache
-  ansible.builtin.apt:
-    update_cache: true
-
 - name: Install Docker
   ansible.builtin.apt:
     name:
       - docker-ce
       - docker-ce-cli
       - containerd.io
+    update_cache: true
 
 - name: Ensure /etc/containerd directory exists
   ansible.builtin.file:
