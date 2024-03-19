@@ -2,7 +2,7 @@
   ansible.builtin.copy:
     src: ../helm-chart
     dest: "{{ ansible_env.HOME }}"
-    mode: '755'
+    mode: "755"
 
 - name: Deploy App
   kubernetes.core.helm:

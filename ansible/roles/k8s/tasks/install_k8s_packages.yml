@@ -36,7 +36,7 @@
 - name: Install kubectl
   ansible.builtin.apt:
     name: kubectl
-  when: inventory_hostname in groups['kube-master']
+  when: inventory_hostname in groups["kube_master"]
 
 - name: Hold kubectl
   ansible.builtin.dpkg_selections:
@@ -44,4 +44,4 @@
     selection: hold
   loop:
     - kubectl
-  when: inventory_hostname in groups['kube-master']
+  when: inventory_hostname in groups["kube_master"]

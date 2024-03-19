@@ -4,8 +4,10 @@ ssh_key_local: "{{ home_path_local }}/.ssh/id_rsa"
 ssh_key_public_local: "{{ home_path_local }}/.ssh/id_rsa.pub"
 
 gcp_project: bosch-150126
+gcp_region: europe-west1
 gcp_zone: europe-west1-b
-service_account_file: "{{ home_path_local }}/secret/bosch-150126-1836c1259684.json"
+gcp_ip_cidr_range: 10.240.0.0/24
+gcp_service_account_file: "{{ home_path_local }}/secret/bosch-150126-1836c1259684.json"
 
 node_count: 3
 master_count: 1

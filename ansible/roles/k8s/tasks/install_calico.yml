@@ -1,3 +1,12 @@
+- name: Get all Namespaces
+  kubernetes.core.k8s_info:
+    kind: Namespace
+  register: all_namespaces
+
+- name: Check if the calico-system namespace exists
+  ansible.builtin.set_fact:
+    calico_exists: "{{ 'calico-system' in (all_namespaces.resources | map(attribute='metadata.name') | list) }}"
+
 - name: Deploy Tigera operator
   kubernetes.core.k8s:
     src: "https://raw.githubusercontent.com/projectcalico/calico/v3.27.2/manifests/tigera-operator.yaml"

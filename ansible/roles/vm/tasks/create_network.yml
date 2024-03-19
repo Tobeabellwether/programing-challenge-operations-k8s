@@ -1,0 +1,56 @@
+- name: Create k8s VPC network
+  google.cloud.gcp_compute_network:
+    name: k8s
+    project: "{{ gcp_project }}"
+    auth_kind: serviceaccount
+    service_account_file: "{{ gcp_service_account_file }}"
+    auto_create_subnetworks: false
+    state: present
+  register: k8s_network
+
+- name: Create subnet for the k8s network
+  google.cloud.gcp_compute_subnetwork:
+    name: k8s-nodes
+    project: "{{ gcp_project }}"
+    auth_kind: serviceaccount
+    service_account_file: "{{ gcp_service_account_file }}"
+    ip_cidr_range: "{{ gcp_ip_cidr_range }}"
+    region: "{{ gcp_region }}"
+    network: "{{ k8s_network }}"
+    state: present
+  register: k8s_subnetwork
+
+- name: Create firewall rules allowing internal traffic
+  google.cloud.gcp_compute_firewall:
+    name: k8s-allow-internal
+    project: "{{ gcp_project }}"
+    auth_kind: serviceaccount
+    service_account_file: "{{ gcp_service_account_file }}"
+    network: "{{ k8s_network }}"
+    allowed:
+      - ip_protocol: tcp
+      - ip_protocol: udp
+      - ip_protocol: icmp
+      - ip_protocol: ipip
+    source_ranges: 10.240.0.0/24
+    state: present
+
+- name: Create firewall rules allowing external traffic
+  google.cloud.gcp_compute_firewall:
+    name: k8s-allow-external
+    project: "{{ gcp_project }}"
+    auth_kind: serviceaccount
+    service_account_file: "{{ gcp_service_account_file }}"
+    network: "{{ k8s_network }}"
+    allowed:
+      - ip_protocol: tcp
+        ports:
+          - "22" # SSH
+          - "80" # HTTP
+          - "443" # HTTPS
+          - "6443" # K8s API Server
+          - "30000-32767" # K8s NodePort Service
+      - ip_protocol: icmp
+    source_ranges: 0.0.0.0/0
+    direction: INGRESS
+    state: present

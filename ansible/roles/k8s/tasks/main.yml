@@ -9,20 +9,27 @@
 
 - name: Create Kubernetes cluster
   ansible.builtin.import_tasks: create_k8s_cluster.yml
-  when: inventory_hostname in groups['kube-master']
+  when: inventory_hostname in groups["kube_master"]
   run_once: true
 
-- name: Join node to cluster
-  ansible.builtin.command: "{{ hostvars[groups['kube-master'][0]].join_command.stdout }}"
+- name: Check if node is already part of a cluster
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf
   changed_when: false
-  when: inventory_hostname in groups['kube-node']
+  when: inventory_hostname in groups["kube_node"]
+
+- name: Join node to cluster
+  ansible.builtin.command: "{{ hostvars[groups['kube_master'][0]].join_command.stdout }}"
+  changed_when: false
+  when: inventory_hostname in groups["kube_node"]
 
 - name: Install Helm
   ansible.builtin.import_tasks: install_helm.yml
-  when: inventory_hostname in groups['kube-master']
+  when: inventory_hostname in groups["kube_master"]
   run_once: true
 
 - name: Install Calico
   ansible.builtin.import_tasks: install_calico.yml
-  when: inventory_hostname in groups['kube-master']
+  when: inventory_hostname in groups["kube_master"]
   run_once: true

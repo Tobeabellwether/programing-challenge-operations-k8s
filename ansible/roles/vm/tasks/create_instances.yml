@@ -15,7 +15,7 @@
     name: "{{ vm_prefix }}-{{ item }}"
     project: "{{ gcp_project }}"
     auth_kind: serviceaccount
-    service_account_file: "{{ service_account_file }}"
+    service_account_file: "{{ gcp_service_account_file }}"
     metadata:
       ssh-keys: "{{ user_name }}:{{ lookup('file', ssh_key_public_local) }}"
     zone: "{{ gcp_zone }}"
@@ -23,8 +23,7 @@
     can_ip_forward: true
     tags:
       items:
-        - http-server
-        - https-server
+        - k8s
     disks:
       - auto_delete: true
         boot: true
@@ -32,8 +31,8 @@
           source_image: "{{ vm_image }}"
           disk_size_gb: "{{ vm_disk_size }}"
     network_interfaces:
-      - network:
-          selfLink: "global/networks/default"
+      - network: "{{ k8s_network }}"
+        subnetwork: "{{ k8s_subnetwork }}"
         access_configs:
           - name: External NAT
             type: ONE_TO_ONE_NAT
@@ -44,5 +43,5 @@
 - name: Generate inventory file
   ansible.builtin.template:
     src: hosts.j2
-    dest: "./inventory/hosts.ini"
-    mode: '0644'
+    dest: ./inventory/hosts.ini
+    mode: "644"

@@ -1,11 +1,11 @@
-[kube-master]
+[kube_master]
 {% for instance in gcp_instances.results %}
 {% if loop.index <= master_count %}
 {{ instance.name }} ansible_host={{ instance.networkInterfaces[0].accessConfigs[0].natIP }}
 {% endif %}
 {% endfor %}
 
-[kube-node]
+[kube_node]
 {% for instance in gcp_instances.results %}
 {% if loop.index > master_count %}
 {{ instance.name }} ansible_host={{ instance.networkInterfaces[0].accessConfigs[0].natIP }}

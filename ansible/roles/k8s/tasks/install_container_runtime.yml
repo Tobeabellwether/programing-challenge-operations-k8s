@@ -1,6 +1,6 @@
 - name: Add Docker GPG key
   ansible.builtin.get_url:
-    url: https://download.docker.com/linux/ubuntu/gpg
+    url: https://download.docker.com/linux/debian/gpg
     dest: /etc/apt/keyrings/docker.asc
     mode: "644"
 
@@ -46,8 +46,8 @@
 - name: Configure Cgroup
   ansible.builtin.lineinfile:
     path: /etc/containerd/config.toml
-    regexp: '^(\s*)SystemdCgroup\s*=\s*false'
-    line: '\1SystemdCgroup = true'
+    regexp: ^(\s*)SystemdCgroup\s*=\s*false
+    line: \1SystemdCgroup = true
     backrefs: true
 
 - name: Restart containerd

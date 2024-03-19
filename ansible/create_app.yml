@@ -1,4 +1,4 @@
-- name: Create app
+- name: Create APP
   hosts: all
   gather_facts: true
   roles:

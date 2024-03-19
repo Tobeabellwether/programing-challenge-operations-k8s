@@ -12,7 +12,7 @@
 
 - name: Copy GCP service account key to remote
   ansible.builtin.copy:
-    src: "{{ service_account_file }}"
+    src: "{{ gcp_service_account_file }}"
     dest: "/tmp/service-account-key.json"
     mode: "400"
 
@@ -40,7 +40,7 @@
     ENABLE_KMS: "{{ db_enable_kms }}"
     ENABLE_KMS_ADMIN: "{{ db_enable_kms_admin }}"
     GCE_PD_DRIVER_VERSION: "{{ db_gce_pd_driver_version }}"
-  timeout: 60
+  timeout: 600
 
 - name: Deploy the driver on Kubernetes cluster
   ansible.builtin.command: ./deploy/kubernetes/deploy-driver.sh
@@ -68,31 +68,3 @@
       parameters:
         type: pd-standard
       volumeBindingMode: WaitForFirstConsumer
-
-- name: Create Persistent Volume
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: PersistentVolume
-      metadata:
-        name: "{{ db_persistent_volume_name }}"
-        annotations:
-          pv.kubernetes.io/provisioned-by: pd.csi.storage.gke.io
-      spec:
-        storageClassName: "{{ db_storage_class_name }}"
-        capacity:
-          storage: "{{ db_external_disk_size }}"
-        accessModes:
-          - ReadWriteOnce
-        nodeAffinity:
-          required:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: topology.gke.io/zone
-                    operator: In
-                    values:
-                      - "{{ gcp_zone }}"
-        csi:
-          driver: "pd.csi.storage.gke.io"
-          volumeHandle: "projects/{{ gcp_project }}/zones/{{ gcp_zone }}/disks/{{ db_external_disk_name }}"

@@ -1,5 +1,5 @@
+- name: Create k8s network for GCP instances
+  ansible.builtin.import_tasks: create_network.yml
+
 - name: Enable GCP APIs and create instances
   ansible.builtin.import_tasks: create_instances.yml
-
-- name: Configure network for created GCP instances
-  ansible.builtin.import_tasks: configure_network.yml
