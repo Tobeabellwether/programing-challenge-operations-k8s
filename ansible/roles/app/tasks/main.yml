@@ -3,6 +3,11 @@
 #   become: false
 #   delegate_to: localhost
 
+- name: Create RBAC
+  ansible.builtin.import_tasks: create_rbac.yml
+  when: inventory_hostname in groups["kube_master"]
+  run_once: true
+
 - name: Create ingress
   ansible.builtin.import_tasks: create_ingress.yml
   when: inventory_hostname in groups["kube_master"]

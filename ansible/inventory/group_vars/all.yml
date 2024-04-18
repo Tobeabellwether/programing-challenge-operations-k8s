@@ -12,6 +12,7 @@ gcp_service_account_file: "{{ home_path_local }}/secret/bosch-150126-1836c125968
 node_count: 3
 master_count: 1
 
-app_namespace: default
+app_namespace: app
+app_service_account: app-user
 app_replica_count: 2
 app_name: getting-started

@@ -3,5 +3,6 @@
   gather_facts: true
   roles:
     - k8s
-    - db
-    - app
+    # - db
+    # - app
+    # - crd

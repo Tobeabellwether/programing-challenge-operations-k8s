@@ -1,0 +1,17 @@
+- name: Get system architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Download the Operator SDK binary
+  ansible.builtin.get_url:
+    url: "https://github.com/operator-framework/operator-sdk/releases/download/v1.34.1/operator-sdk_linux_{{ system_arch.stdout }}"
+    dest: "/tmp/operator-sdk_linux_{{ system_arch.stdout }}"
+    mode: "755"
+
+- name: Install Operator SDK
+  ansible.builtin.copy:
+    remote_src: true
+    src: "/tmp/operator-sdk_linux_{{ system_arch.stdout }}"
+    dest: "/usr/local/bin/operator-sdk"
+    mode: "755"

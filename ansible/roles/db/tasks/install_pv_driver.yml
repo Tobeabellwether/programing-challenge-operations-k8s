@@ -1,9 +1,3 @@
-- name: Install Go
-  ansible.builtin.apt:
-    name:
-      - golang-go
-      - python3-pexpect
-
 - name: Clone GCP Compute Persistent Disk CSI Driver repository
   ansible.builtin.git:
     repo: "{{ db_gce_pd_driver_repo }}"
@@ -25,11 +19,23 @@
     path: /tmp/service-account-key.json
     state: absent
 
+- name: Get info of service accounts
+  google.cloud.gcp_iam_service_account_info:
+    project: "{{ gcp_project }}"
+    auth_kind: serviceaccount
+    service_account_file: "{{ gcp_service_account_file }}"
+  register: service_account_info
+  delegate_to: localhost
+  become: false
+
+- name: Check if GCE PV service account exists
+  ansible.builtin.set_fact:
+    db_account_exists: "{{ service_account_info.resources | json_query(query) | length > 0 }}"
+  vars:
+    query: "[?contains(name, '{{ db_gce_pd_sa_name }}')]"
+
 - name: Run setup-project.sh script
-  ansible.builtin.expect:
-    command: ./deploy/setup-project.sh
-    responses:
-      "(y/n)": "y"
+  ansible.builtin.command: ./deploy/setup-project.sh
   args:
     chdir: "{{ db_go_path }}/src/sigs.k8s.io/gcp-compute-persistent-disk-csi-driver"
   environment:
@@ -41,6 +47,8 @@
     ENABLE_KMS_ADMIN: "{{ db_enable_kms_admin }}"
     GCE_PD_DRIVER_VERSION: "{{ db_gce_pd_driver_version }}"
   timeout: 600
+  changed_when: false
+  when: not db_account_exists
 
 - name: Deploy the driver on Kubernetes cluster
   ansible.builtin.command: ./deploy/kubernetes/deploy-driver.sh
@@ -55,6 +63,7 @@
     ENABLE_KMS_ADMIN: "{{ db_enable_kms_admin }}"
     GCE_PD_DRIVER_VERSION: "{{ db_gce_pd_driver_version }}"
   changed_when: false
+  when: not db_account_exists
 
 - name: Create StorageClass csi-gce-pd
   kubernetes.core.k8s:

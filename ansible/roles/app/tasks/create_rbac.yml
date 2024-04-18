@@ -1,0 +1,45 @@
+- name: Create APP namespace
+  kubernetes.core.k8s:
+    name: "{{ app_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create a service account
+  kubernetes.core.k8s:
+    namespace: "{{ app_namespace }}"
+    name: "{{ app_service_account }}"
+    kind: ServiceAccount
+    state: present
+
+- name: Create a new role for pod access
+  kubernetes.core.k8s:
+    namespace: "{{ app_namespace }}"
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: pod-admin
+      rules:
+        - apiGroups: [""]
+          resources: ["pods"]
+          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    state: present
+
+- name: Assign the role by creating a role binding
+  kubernetes.core.k8s:
+    namespace: "{{ app_namespace }}"
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: access-pods
+      subjects:
+        - kind: ServiceAccount
+          name: "{{ app_service_account }}"
+          namespace: "{{ app_namespace }}"
+      roleRef:
+        kind: Role
+        name: pod-admin
+        apiGroup: rbac.authorization.k8s.io
+    state: present

@@ -1,0 +1,1 @@
+crd_operator_sdk_path: "{{ ansible_env.HOME }}/operator-sdk"

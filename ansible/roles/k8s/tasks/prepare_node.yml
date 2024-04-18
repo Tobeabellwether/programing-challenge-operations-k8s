@@ -23,17 +23,60 @@
     - { name: net.bridge.bridge-nf-call-iptables, value: 1 }
     - { name: net.bridge.bridge-nf-call-ip6tables, value: 1 }
 
-- name: Install required packages
+- name: Install required packages for all nodes
   ansible.builtin.apt:
     name:
-      - python3-kubernetes
       - git
       - apt-transport-https
       - ca-certificates
       - curl
       - gpg
+      - make
+      - python3-pip
     autoremove: true
     autoclean: true
+
+- name: Install required packages for master node
+  ansible.builtin.pip:
+    name:
+      - kubernetes
+      - pexpect
+      - ansible
+      - ansible-runner
+      - ansible-runner-http
+      - openshift
+  when: inventory_hostname in groups["kube_master"]
+
+- name: Remove the existing Go directory
+  ansible.builtin.file:
+    path: /usr/local/go
+    state: absent
+  when: inventory_hostname in groups["kube_master"]
+
+- name: Download Go tarball
+  ansible.builtin.get_url:
+    url: https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
+    dest: /tmp/go1.21.9.linux-amd64.tar.gz
+    mode: "644"
+  when: inventory_hostname in groups["kube_master"]
+
+- name: Extract Go tarball
+  ansible.builtin.unarchive:
+    src: /tmp/go1.21.9.linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+  when: inventory_hostname in groups["kube_master"]
+
+- name: Add Go to PATH
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    line: "export PATH=$PATH:/usr/local/go/bin"
+    create: true
+    state: present
+    mode: "644"
+  when: inventory_hostname in groups["kube_master"]
 
 - name: Ensure /etc/apt/keyrings directory exists
   ansible.builtin.file:

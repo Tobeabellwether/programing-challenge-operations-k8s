@@ -1,0 +1,4 @@
+- name: Install Operator SDK
+  ansible.builtin.import_tasks: install_operator_sdk.yml
+  when: inventory_hostname in groups["kube_master"]
+  run_once: true
